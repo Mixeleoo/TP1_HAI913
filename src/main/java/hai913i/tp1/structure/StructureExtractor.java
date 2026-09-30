@@ -1,8 +1,5 @@
 package hai913i.tp1.structure;
 
-import hai913i.tp1.FieldInfo;
-import hai913i.tp1.MethodInfo;
-import hai913i.tp1.TypeInfo;
 import org.eclipse.jdt.core.dom.*;
 import java.util.*;
 
@@ -21,7 +18,7 @@ public class StructureExtractor {
         }
         return result;
     }
-
+/*
     public List<TypeInfo> extractSpecific(CompilationUnit cu, String className) {
         List<TypeInfo> result = new ArrayList<>();
         for (Object o : cu.types()) {
@@ -33,10 +30,10 @@ public class StructureExtractor {
         }
         return result;
     }
-
-    private void extractType(AbstractTypeDeclaration decl, String pkg, List<TypeInfo> out) {
+*/
+    private TypeInfo extractType(AbstractTypeDeclaration decl, String pkg, List<TypeInfo> out) {
         // Les types d'annotation ne comptent pas
-        if (decl instanceof AnnotationTypeDeclaration) return;
+        if (decl instanceof AnnotationTypeDeclaration) return null;
 
         TypeInfo info = new TypeInfo();
         info.packageName = pkg;
@@ -64,10 +61,12 @@ public class StructureExtractor {
                         md.parameters().size(),
                         md.isConstructor()));
             } else if (o instanceof AbstractTypeDeclaration nested) {
-                extractType(nested, pkg, out);
+                // Ici c'est type premier dans notre type premier, donc il faut le mettre dans notre liste de membres qui sont imbriqués
+                info.members.add(extractType(nested, pkg, out));
             }
         }
         out.add(info);
+        return info;
     }
 
     private STRUCTURE_TYPE kindOf(AbstractTypeDeclaration decl) {

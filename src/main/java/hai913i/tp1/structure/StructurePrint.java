@@ -1,7 +1,5 @@
 package hai913i.tp1.structure;
 
-import hai913i.tp1.MethodInfo;
-import hai913i.tp1.TypeInfo;
 import hai913i.tp1.parse.JdtParser;
 
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ public class StructurePrint {
 
         return allTypes;
     }
-
+/*
     private static List<TypeInfo> getSpecificType(List<JdtParser.ParsedFile> files, String className) {
 
         StructureExtractor extractor = new StructureExtractor();
@@ -36,7 +34,7 @@ public class StructurePrint {
 
         return types;
     }
-
+*/
     public static void allDir(List<JdtParser.ParsedFile> files){
         List<TypeInfo> allTypes = getAllType(files);
 
@@ -47,7 +45,7 @@ public class StructurePrint {
                 case classT ->  classes++;
                 case interfaceT -> interfaces++;
                 case enumT -> enumerations++;
-                case  recordT -> records++;
+                case recordT -> records++;
             }
             for(MethodInfo method : t.methods){
                 if(method.isConstructor()) constructors++;
@@ -55,15 +53,41 @@ public class StructurePrint {
             }
             fields += t.fields.size();
         }
-        System.out.println(
-                classes + interfaces + enumerations + records + " classes : " + classes + " classes, " +
-                        interfaces + " interfaces, " +
-                        enumerations + " énumération ; " +
-                        methods + " méthodes, dont " +
-                        constructors + " constructeurs ; " +
-                        fields + " attributs.");
+
+        int total = classes + interfaces + enumerations + records;
+
+        System.out.println("=== Structure du projet ===");
+        System.out.printf("%d types : %d classes, %d interfaces, %d énumérations, %d records%n",
+                total, classes, interfaces, enumerations, records);
+        System.out.printf("%d méthodes (dont %d constructeurs), %d attributs%n%n",
+                methods, constructors, fields);
+
+        for (TypeInfo t : allTypes) {
+            System.out.println("-".repeat(70));
+            System.out.printf("%s %s%n", t.kind, t.qualifiedName);   // ex : classe library.model.Book
+            System.out.println("  Paquetage     : " + t.packageName);
+            System.out.println("  Superclasses  : " + joinOrNone(t.superclasses, " > "));
+            System.out.println("  Interfaces    : " + joinOrNone(t.interfaces, ", "));
+
+            System.out.printf("  Attributs (%d)%n", t.fields.size());
+            for (FieldInfo f : t.fields) {
+                System.out.printf("    %-10s %-20s %s%n", f.visibility(), f.type(), f.name());
+            }
+
+            System.out.printf("  Méthodes (%d)%n", t.methods.size());
+            for (MethodInfo m : t.methods) {
+                System.out.printf("    %-12s %s(%d param%s)%n",
+                        m.isConstructor() ? "constructeur" : "méthode",
+                        m.name(), m.paramCount(), m.paramCount() > 1 ? "s" : "");
+            }
+        }
+        System.out.println("-".repeat(70));
     }
 
+    private static String joinOrNone(List<String> items, String sep) {
+        return items.isEmpty() ? "(aucune)" : String.join(sep, items);
+    }
+/*
     public static void classSpecific(List<JdtParser.ParsedFile> files, String className) {
 
         List<TypeInfo> types = getSpecificType(files, className);
@@ -82,4 +106,5 @@ public class StructurePrint {
 
         System.out.println(s + ".");
     }
+*/
 }

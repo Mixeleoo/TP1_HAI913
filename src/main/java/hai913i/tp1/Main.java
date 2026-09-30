@@ -17,7 +17,6 @@ public final class Main {
         boolean validate = false;
         String astFile = null;
         boolean structure = false;
-        String className = null;
 
         // Lecture des arguments
         for (int i = 0; i < args.length; i++) {
@@ -32,19 +31,11 @@ public final class Main {
                     astFile = args[++i];
                 }
                 case "--structure" -> structure = true;
-                case "--class" -> {
-                    if (i + 1 >= args.length) usage("--class attend un nom de class");
-                    className = args[++i];
-                }
                 default -> usage("Option inconnue : " + args[i]);
             }
         }
         if (source == null) usage("--source est obligatoire");
         if (!validate && astFile == null && !structure) usage("Aucune action demandée");
-
-        if (className != null && !structure) {
-            usage("--class s'utilise avec --structure");
-        }
 
         ProjectSources sources;
         try {
@@ -63,19 +54,14 @@ public final class Main {
             printAst(files, astFile);
         }
         if(structure){
-            // Si c'est pour une classe précise
-            if (className == null) {
-                StructurePrint.allDir(files);
-            } else {
-                StructurePrint.classSpecific(files, className);
-            }
+            StructurePrint.allDir(files);
         }
     }
 
     // On met toutes les commandes ici
     private static void usage(String message) {
         System.err.println("Erreur : " + message);
-        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java]");
+        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure]");
         System.exit(2);
     }
 
@@ -96,7 +82,7 @@ public final class Main {
         System.out.println("Erreurs de compilation : " + errors);
     }
 
-    // Méthode qui visite un fichier passé en paramètres.
+    // Méthode qui visite un fichier passé en paramètres
     private static void printAst(List<ParsedFile> files, String fileName) {
         boolean found = false;
         for (ParsedFile file : files) {
