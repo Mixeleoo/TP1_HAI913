@@ -3,6 +3,7 @@ package hai913i.tp1;
 import java.nio.file.Path;
 import java.util.List;
 
+import hai913i.tp1.calls.CallPrint;
 import hai913i.tp1.structure.StructurePrint;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -17,6 +18,7 @@ public final class Main {
         boolean validate = false;
         String astFile = null;
         boolean structure = false;
+        boolean calls = false;
 
         // Lecture des arguments
         for (int i = 0; i < args.length; i++) {
@@ -31,11 +33,12 @@ public final class Main {
                     astFile = args[++i];
                 }
                 case "--structure" -> structure = true;
+                case "--calls" -> calls = true;
                 default -> usage("Option inconnue : " + args[i]);
             }
         }
         if (source == null) usage("--source est obligatoire");
-        if (!validate && astFile == null && !structure) usage("Aucune action demandée");
+        if (!validate && astFile == null && !structure && !calls) usage("Aucune action demandée");
 
         ProjectSources sources;
         try {
@@ -56,12 +59,15 @@ public final class Main {
         if(structure){
             StructurePrint.allDir(files);
         }
+        if (calls) {
+            CallPrint.allCalls(files);
+        }
     }
 
     // On met toutes les commandes ici
     private static void usage(String message) {
         System.err.println("Erreur : " + message);
-        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure]");
+        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure] [--calls]");
         System.exit(2);
     }
 
