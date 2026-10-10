@@ -4,8 +4,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 import hai913i.tp1.extract.ProjectExtractor;
+import hai913i.tp1.graph.CallGraph;
 import hai913i.tp1.metrics.MetricsCalculator;
 import hai913i.tp1.output.CallPrint;
+import hai913i.tp1.output.GraphPrint;
 import hai913i.tp1.output.MetricsPrint;
 import hai913i.tp1.output.StructurePrint;
 import hai913i.tp1.model.TypeInfo;
@@ -24,6 +26,8 @@ public final class Main {
         boolean structure = false;
         boolean calls = false;
         boolean metrics = false;
+        boolean graph = false;
+        String method = null;
         Integer threshold = null;
 
         // Lecture des arguments
@@ -41,6 +45,11 @@ public final class Main {
                 case "--structure" -> structure = true;
                 case "--calls" -> calls = true;
                 case "--metrics" -> metrics = true;
+                case "--graph" -> graph = true;
+                case "--method" -> {
+                    if (i + 1 >= args.length) usage("--method attend une signature, ex : \"library.model.Item#getTitle()\"");
+                    method = args[++i];
+                }
                 case "--threshold" -> {
                     if (i + 1 >= args.length) usage("--threshold attend un entier positif ou nul");
                     try {
@@ -54,7 +63,7 @@ public final class Main {
             }
         }
         if (source == null) usage("--source est obligatoire");
-        if (!validate && astFile == null && !structure && !calls && !metrics) usage("Aucune action demandée");
+        if (!validate && astFile == null && !structure && !calls && !metrics && !graph && method == null) usage("Aucune action demandée");
         if (metrics && threshold == null) usage("--threshold est obligatoire avec --metrics");
         if (!metrics && threshold != null) usage("--threshold nécessite --metrics");
 
@@ -74,13 +83,14 @@ public final class Main {
         if (astFile != null) {
             printAst(files, astFile);
         }
-        if (structure || calls || metrics) {
+        if (structure || calls || metrics || graph || method != null) {
             ProjectExtractor extractor = new ProjectExtractor();
             if (metrics) {
                 var project = extractor.extractProject(files);
                 MetricsPrint.print(MetricsCalculator.calculate(project, threshold));
                 if (structure) StructurePrint.allDir(project.types());
                 if (calls) CallPrint.allCalls(project.types());
+                if (graph || method != null) printGraph(CallGraph.build(project.types()), graph, method);
             } else {
                 List<TypeInfo> extractedTypes = extractor.extract(files);
                 if (structure) {
@@ -89,6 +99,9 @@ public final class Main {
                 if (calls) {
                     CallPrint.allCalls(extractedTypes);
                 }
+                if (graph || method != null) {
+                    printGraph(CallGraph.build(extractedTypes), graph, method);
+                }
             }
         }
     }
@@ -96,8 +109,13 @@ public final class Main {
     // On met toutes les commandes ici
     private static void usage(String message) {
         System.err.println("Erreur : " + message);
-        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure] [--calls] [--metrics --threshold X]");
+        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure] [--calls] [--metrics --threshold X] [--graph] [--method SIGNATURE]");
         System.exit(2);
+    }
+
+    private static void printGraph(CallGraph callGraph, boolean graph, String method) {
+        if (graph) GraphPrint.print(callGraph);
+        if (method != null) GraphPrint.printMethod(callGraph, method);
     }
 
     // Méthode de Parsing
