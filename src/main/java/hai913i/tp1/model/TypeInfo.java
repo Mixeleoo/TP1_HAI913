@@ -1,4 +1,6 @@
-package hai913i.tp1.structure;
+package hai913i.tp1.model;
+
+import hai913i.tp1.extract.STRUCTURE_TYPE;
 
 import java.util.ArrayList;
 import java.util.List;

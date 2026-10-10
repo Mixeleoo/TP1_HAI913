@@ -3,8 +3,12 @@ package hai913i.tp1;
 import java.nio.file.Path;
 import java.util.List;
 
-import hai913i.tp1.calls.CallPrint;
-import hai913i.tp1.structure.StructurePrint;
+import hai913i.tp1.extract.ProjectExtractor;
+import hai913i.tp1.metrics.MetricsCalculator;
+import hai913i.tp1.output.CallPrint;
+import hai913i.tp1.output.MetricsPrint;
+import hai913i.tp1.output.StructurePrint;
+import hai913i.tp1.model.TypeInfo;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import hai913i.tp1.parse.JdtParser;
@@ -19,6 +23,8 @@ public final class Main {
         String astFile = null;
         boolean structure = false;
         boolean calls = false;
+        boolean metrics = false;
+        Integer threshold = null;
 
         // Lecture des arguments
         for (int i = 0; i < args.length; i++) {
@@ -34,11 +40,23 @@ public final class Main {
                 }
                 case "--structure" -> structure = true;
                 case "--calls" -> calls = true;
+                case "--metrics" -> metrics = true;
+                case "--threshold" -> {
+                    if (i + 1 >= args.length) usage("--threshold attend un entier positif ou nul");
+                    try {
+                        threshold = Integer.parseInt(args[++i]);
+                        if (threshold < 0) usage("--threshold doit être positif ou nul");
+                    } catch (NumberFormatException e) {
+                        usage("--threshold doit être un entier positif ou nul");
+                    }
+                }
                 default -> usage("Option inconnue : " + args[i]);
             }
         }
         if (source == null) usage("--source est obligatoire");
-        if (!validate && astFile == null && !structure && !calls) usage("Aucune action demandée");
+        if (!validate && astFile == null && !structure && !calls && !metrics) usage("Aucune action demandée");
+        if (metrics && threshold == null) usage("--threshold est obligatoire avec --metrics");
+        if (!metrics && threshold != null) usage("--threshold nécessite --metrics");
 
         ProjectSources sources;
         try {
@@ -56,18 +74,29 @@ public final class Main {
         if (astFile != null) {
             printAst(files, astFile);
         }
-        if(structure){
-            StructurePrint.allDir(files);
-        }
-        if (calls) {
-            CallPrint.allCalls(files);
+        if (structure || calls || metrics) {
+            ProjectExtractor extractor = new ProjectExtractor();
+            if (metrics) {
+                var project = extractor.extractProject(files);
+                MetricsPrint.print(MetricsCalculator.calculate(project, threshold));
+                if (structure) StructurePrint.allDir(project.types());
+                if (calls) CallPrint.allCalls(project.types());
+            } else {
+                List<TypeInfo> extractedTypes = extractor.extract(files);
+                if (structure) {
+                    StructurePrint.allDir(extractedTypes);
+                }
+                if (calls) {
+                    CallPrint.allCalls(extractedTypes);
+                }
+            }
         }
     }
 
     // On met toutes les commandes ici
     private static void usage(String message) {
         System.err.println("Erreur : " + message);
-        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure] [--calls]");
+        System.err.println("Usage : java -jar analyzer.jar --source DOSSIER [--validate] [--ast FICHIER.java] [--structure] [--calls] [--metrics --threshold X]");
         System.exit(2);
     }
 
