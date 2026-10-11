@@ -59,13 +59,13 @@ Remplacez ces chemins par leur emplacement si nécessaire. Le chemin fourni doit
 
 ### Options
 
-- `--validate`: Affiche les diagnostics de compilation JDT et le nombre d’unités de compilation et d’erreurs. |
-- `--ast FICHIER.java`: Affiche l’arbre AST du fichier portant ce nom dans le projet analysé. |
-- `--structure`: Affiche les types, leur paquetage, héritage, interfaces, attributs et méthodes. |
-- `--calls`: Affiche les appels extraits, leur ligne, le type statique du receveur et la cible lorsqu’elle est connue. |*
-- `--metrics --threshold X`: Affiche les 13 métriques B2. `X` est un entier positif ou nul et est obligatoire avec `--metrics`. |
-- `--graph`: Affiche les nœuds et arcs pondérés du graphe d’appel. |
-- `--method "SIGNATURE"`: Affiche les méthodes appelées et appelantes d’une méthode identifiée par sa signature complète. |
+- `--validate`: Affiche les diagnostics de compilation JDT et le nombre d’unités de compilation et d’erreurs.
+- `--ast FICHIER.java`: Affiche l’arbre AST du fichier portant ce nom dans le projet analysé.
+- `--structure`: Affiche les types, leur paquetage, héritage, interfaces, attributs et méthodes.
+- `--calls`: Affiche les appels extraits, leur ligne, le type statique du receveur et la cible lorsqu’elle est connue.
+- `--metrics --threshold X`: Affiche les 13 métriques B2. `X` est un entier positif ou nul et est obligatoire avec `--metrics`.
+- `--graph`: Affiche les nœuds et arcs pondérés du graphe d’appel.
+- `--method "SIGNATURE"`: Affiche les méthodes appelées et appelantes d’une méthode identifiée par sa signature complète.
 
 Une action doit être spécifiée. `--threshold` n’est accepté qu’avec `--metrics`. Les options inconnues, les arguments manquants et les seuils invalides sont signalés comme erreurs.
 
