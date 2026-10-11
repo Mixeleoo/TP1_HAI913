@@ -30,9 +30,4 @@ public class ASTPrinter extends ASTVisitor {
     public void postVisit(ASTNode node) {
         depth--;
     }
-
-    @Override
-    public boolean visit(MethodDeclaration md){
-        return false;
-    }
 }
