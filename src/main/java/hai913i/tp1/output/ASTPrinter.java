@@ -1,4 +1,4 @@
-package hai913i.tp1;
+package hai913i.tp1.output;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;

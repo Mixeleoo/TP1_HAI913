@@ -6,10 +6,7 @@ import java.util.List;
 import hai913i.tp1.extract.ProjectExtractor;
 import hai913i.tp1.graph.CallGraph;
 import hai913i.tp1.metrics.MetricsCalculator;
-import hai913i.tp1.output.CallPrint;
-import hai913i.tp1.output.GraphPrint;
-import hai913i.tp1.output.MetricsPrint;
-import hai913i.tp1.output.StructurePrint;
+import hai913i.tp1.output.*;
 import hai913i.tp1.model.TypeInfo;
 import org.eclipse.jdt.core.compiler.IProblem;
 
