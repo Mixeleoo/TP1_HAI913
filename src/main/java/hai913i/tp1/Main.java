@@ -3,16 +3,14 @@ package hai913i.tp1;
 import java.nio.file.Path;
 import java.util.List;
 
-import hai913i.tp1.extract.ProjectExtractor;
-import hai913i.tp1.graph.CallGraph;
+import hai913i.tp1.parse.ProjectSources;
 import hai913i.tp1.metrics.MetricsCalculator;
 import hai913i.tp1.output.*;
 import hai913i.tp1.model.TypeInfo;
 import org.eclipse.jdt.core.compiler.IProblem;
-
-import hai913i.tp1.parse.JdtParser;
+import hai913i.tp1.extract.FilesExtractor;
+import hai913i.tp1.graph.CallGraph;
 import hai913i.tp1.parse.JdtParser.ParsedFile;
-import hai913i.tp1.parse.ProjectSources;
 
 public final class Main {
 
@@ -64,32 +62,23 @@ public final class Main {
         if (metrics && threshold == null) usage("--threshold est obligatoire avec --metrics");
         if (!metrics && threshold != null) usage("--threshold nécessite --metrics");
 
-        ProjectSources sources;
-        try {
-            sources = ProjectSources.of(source);
-        } catch (IllegalArgumentException e) {
-            System.err.println("Erreur : " + e.getMessage());
-            System.exit(3);
-            return;
-        }
-        List<ParsedFile> files = JdtParser.parse(sources, List.of());
+        FilesExtractor extractor = new FilesExtractor(source);
 
         if (validate) {
-            printValidation(sources, files);
+            printValidation(extractor.getSources(), extractor.getFiles());
         }
         if (astFile != null) {
-            printAst(files, astFile);
+            printAst(extractor.getFiles(), astFile);
         }
         if (structure || calls || metrics || graph || method != null) {
-            ProjectExtractor extractor = new ProjectExtractor();
             if (metrics) {
-                var project = extractor.extractProject(files);
+                var project = extractor.extractProject();
                 MetricsPrint.print(MetricsCalculator.calculate(project, threshold));
                 if (structure) StructurePrint.allDir(project.types());
                 if (calls) CallPrint.allCalls(project.types());
-                if (graph || method != null) printGraph(CallGraph.build(project.types()), graph, method);
+                if (graph || method != null) printGraph(extractor.callGraphBuild(), graph, method);
             } else {
-                List<TypeInfo> extractedTypes = extractor.extract(files);
+                List<TypeInfo> extractedTypes = extractor.extract();
                 if (structure) {
                     StructurePrint.allDir(extractedTypes);
                 }
@@ -97,7 +86,7 @@ public final class Main {
                     CallPrint.allCalls(extractedTypes);
                 }
                 if (graph || method != null) {
-                    printGraph(CallGraph.build(extractedTypes), graph, method);
+                    printGraph(extractor.callGraphBuild(), graph, method);
                 }
             }
         }
